@@ -1,74 +1,48 @@
 <template>
   <div justify="center" align="center">
-    <v-row>
-      <v-col>
+    <v-form v-model="isValid" ref="form" v-if="fields">
+      <div v-for="field in Object.keys(fields || {})" :key="field.title">
         <v-text-field
-          v-model="city"
-          :counter="40"
-          label="Город"
+          v-if="fields[field].type === 'string'"
+          v-model="formData[field]"
+          :rules="[(v) => !!v || 'Validation error']"
+          :label="fields[field].title"
+          :placeholder="fields[field].title"
           required
         ></v-text-field>
-      </v-col>
-      <v-col>
+        <v-select
+          v-else-if="fields[field].type === 'select'"
+          v-model="formData[field]"
+          :rules="[(v) => !!v || 'Validation error']"
+          :items="fields[field].values"
+          :label="fields[field].title"
+          :placeholder="fields[field].title"
+          required
+        ></v-select>
+      </div>
+      <div v-for="(field, i) in Object.keys(referenceFields || {})" :key="i">
         <v-text-field
-          v-model="address"
-          :counter="40"
-          label="Адрес"
+          v-if="referenceFields[field].type === 'string'"
+          v-model="formData[field]"
+          :rules="[(v) => !!v || 'Validation error']"
+          :label="referenceFields[field].title"
+          :placeholder="referenceFields[field].title"
           required
         ></v-text-field>
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="phone"
-          :counter="40"
-          label="Телефон"
+        <v-select
+          v-else-if="referenceFields[field].type === 'select'"
+          v-model="formData[field]"
+          :rules="[(v) => !!v || 'Validation error']"
+          :items="referenceFields[field].values"
+          :label="referenceFields[field].title"
+          :placeholder="referenceFields[field].title"
           required
-        ></v-text-field>
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="price"
-          :counter="40"
-          label="Цена"
-          required
-        ></v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
-        <v-text-field
-          v-model="model"
-          :counter="40"
-          label="модель авто"
-          required
-        ></v-text-field>
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="car_type"
-          :counter="40"
-          label="Тип авто"
-          required
-        ></v-text-field>
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="engine_volume"
-          :counter="40"
-          label="Объем двигателя"
-          required
-        ></v-text-field>
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="engine_power"
-          :counter="40"
-          label="Мощность двигателя"
-          required
-        ></v-text-field>
-      </v-col>
-    </v-row>
-    <v-btn class="mt-5 mb-10" @click="submit"> Добавить объявление </v-btn>
+        ></v-select>
+      </div>
+      <v-btn :disabled="!isValid" class="mt-5 mb-10" @click="submit">
+        Добавить объявление
+      </v-btn>
+    </v-form>
     <v-card
       v-for="item in $store.state.tableData"
       :key="item.id"
@@ -87,28 +61,23 @@
 export default {
   name: "TablePage",
   data: () => ({
-    city: "",
-    address: "",
-    phone: "",
-    price: "",
-    model: '',
-    car_type: '',
-    engine_volume: "",
-    engine_power: ""
+    formData: {},
+    isValid: false,
   }),
+  computed: {
+    fields() {
+      return this.$store.state.fields?.fields;
+    },
+    referenceFields() {
+      return this.$store.state.fields?.reference_fields[
+        `type.${this.formData.type}`
+      ];
+    },
+  },
   methods: {
-    submit() {
-      this.$store.dispatch("addTableItem", {
-        type: "car",
-        city: this.city,
-        address: this.address,
-        phone: this.phone,
-        price: this.price,
-        model: this.model,
-        car_type: this.car_type,
-        engine_volume: this.engine_volume,
-        engine_power: this.engine_power
-      });
+    async submit() {
+      await this.$store.dispatch("addTableItem", this.formData);
+      this.$refs.form.reset()
     },
   },
 };

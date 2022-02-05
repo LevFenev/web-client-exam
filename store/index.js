@@ -1,6 +1,7 @@
 export const state = () => ({
     tableData: [],
-    pagesData: {}
+    pagesData: {},
+    fields: null
 })
 export const mutations = {
     setTableData(state, data) {
@@ -8,6 +9,9 @@ export const mutations = {
     },
     setPagesData(state, data) {
         state.pagesData = data
+    },
+    setFields(state, data) {
+        state.fields = data
     }
 }
 export const getters = {}
@@ -32,5 +36,9 @@ export const actions = {
     async addTableItem({dispatch}, data) {
         await this.$axios.$post("https://demo-api.vsdev.space/api/brom/sales", data)
         dispatch("getTableData")
+    },
+    async getFormFields({commit}) {
+        let fields = await this.$axios.$get("https://demo-api.vsdev.space/api/brom/sales/form")
+        commit("setFields", fields)
     }
 }

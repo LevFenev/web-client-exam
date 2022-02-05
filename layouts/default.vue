@@ -109,6 +109,7 @@ export default {
   mounted() {
     this.$store.dispatch("getTableData");
     this.$store.dispatch("getDefaultPagesData");
+    this.$store.dispatch("getFormFields");
   },
 };
 </script>
